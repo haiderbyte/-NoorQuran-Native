@@ -1,0 +1,32 @@
+name: Android CI Build
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'zulu'
+        java-version: '17'
+        cache: 'gradle'
+
+    - name: Grant Execute Permission for Gradle Wrapper
+      run: chmod +x gradlew
+
+    # خطوة هامة لإنشاء مجلد قواعد البيانات الفارغ مؤقتاً حتى ينجح البناء إذا لم تشحن ملف الـ DB الفعلي
+    - name: Create Placeholder Assets Database Directory
+      run: mkdir -p app/src/main/assets/databases && touch app/src/main/assets/databases/noor_quran_database.db
+
+    - name: Compile and Verify Kotlin Code
+      run: ./gradlew :app:compileDebugKotlin --no-daemon
