@@ -21,12 +21,33 @@ jobs:
         java-version: '17'
         cache: 'gradle'
 
-    - name: Grant Execute Permission for Gradle Wrapper
-      run: chmod +x gradlew
-
-    # خطوة هامة لإنشاء مجلد قواعد البيانات الفارغ مؤقتاً حتى ينجح البناء إذا لم تشحن ملف الـ DB الفعلي
     - name: Create Placeholder Assets Database Directory
-      run: mkdir -p app/src/main/assets/databases && touch app/src/main/assets/databases/noor_quran_database.db
+      run: |
+        mkdir -p app/src/main/assets/databases
+        touch app/src/main/assets/databases/noor_quran_database.db
+        mkdir -p src/main/assets/databases
+        touch src/main/assets/databases/noor_quran_database.db
 
-    - name: Compile and Verify Kotlin Code
-      run: ./gradlew :app:compileDebugKotlin --no-daemon
+    - name: Detect Gradle and Compile Kotlin Code
+      run: |
+        if [ -f gradlew ]; then
+          echo "تم العثور على gradlew في المجلد الرئيسي"
+          chmod +x gradlew
+          ./gradlew :app:compileDebugKotlin --no-daemon
+        elif [ -f app/gradlew ]; then
+          echo "تم العثور على gradlew داخل مجلد app"
+          chmod +x app/gradlew
+          cd app && ./gradlew :app:compileDebugKotlin --no-daemon
+        else
+          echo "لم يتم العثور على ملف gradlew؛ جاري تحميل وتثبيت Gradle CLI تلقائياً..."
+          sudo apt-get update && sudo apt-get install -y unzip
+          curl -sLo gradle.zip https://services.gradle.org/distributions/gradle-8.6-bin.zip
+          mkdir -p /opt/gradle && unzip -q gradle.zip -d /opt/gradle
+          export PATH=$PATH:/opt/gradle/gradle-8.6/bin
+          
+          if [ -f app/build.gradle.kts ]; then
+            cd app && /opt/gradle/gradle-8.6/bin/gradle :app:compileDebugKotlin --no-daemon
+          else
+            /opt/gradle/gradle-8.6/bin/gradle :app:compileDebugKotlin --no-daemon
+          fi
+        fi
