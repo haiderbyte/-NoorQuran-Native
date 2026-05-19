@@ -45,7 +45,49 @@ fun SurahListScreen(
             items(surahs, key = { it.id }) { surah ->
                 SurahListItem(surah = surah, onClick = { onSurahClick(surah.id) })
             }
+
+            item {
+                DeveloperInfoSection()
+            }
         }
+    }
+}
+
+@Composable
+fun DeveloperInfoSection() {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 48.dp, horizontal = 12.dp),
+        horizontalAlignment = Alignment.End
+    ) {
+        HorizontalDivider(
+            modifier = Modifier.padding(bottom = 24.dp),
+            color = Color(0xFF222222)
+        )
+        Text(
+            text = "نبذة عن المطور",
+            color = Color.White,
+            fontSize = 20.sp,
+            fontWeight = FontWeight.Medium,
+            modifier = Modifier.padding(bottom = 12.dp)
+        )
+        Text(
+            text = "تم تطوير هذا المشروع بالكامل بواسطة المطور محمد حيدر.",
+            color = Color(0xFFD4D4D4),
+            fontSize = 15.sp,
+            textAlign = androidx.compose.ui.text.style.TextAlign.Right,
+            modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(modifier = Modifier.height(12.dp))
+        Text(
+            text = "أسأل الله العلي العظيم أن يجعل هذا العمل خالصا لوجهه الكريم، وأن يتقبله صدقة جارية لي ولوالدي، وأن يكون نورا ورفعة لنا في الدنيا والآخرة. لا تنسونا من صالح دعائكم بظهر الغيب.",
+            color = Color(0xFF888888),
+            fontSize = 14.sp,
+            lineHeight = 22.sp,
+            textAlign = androidx.compose.ui.text.style.TextAlign.Right,
+            modifier = Modifier.fillMaxWidth()
+        )
     }
 }
 
