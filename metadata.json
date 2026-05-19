@@ -1,0 +1,6 @@
+{
+  "name": "Noor Quran",
+  "description": "A luxury, minimal, and offline-first Quran reader for a spiritual experience.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
