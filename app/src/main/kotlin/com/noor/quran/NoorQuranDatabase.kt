@@ -47,7 +47,8 @@ abstract class NoorQuranDatabase : RoomDatabase() {
                     context.applicationContext,
                     NoorQuranDatabase::class.java,
                     "NoorQuran.db"
-                ).build()
+                ).createFromAsset("databases/noor_quran_database.db")
+                 .build()
                 INSTANCE = instance
                 instance
             }
