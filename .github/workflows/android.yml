@@ -28,19 +28,21 @@ jobs:
         mkdir -p src/main/assets/databases
         touch src/main/assets/databases/noor_quran_database.db
 
-    - name: Fix Corrupt Wrapper and Compile Kotlin Code
+    - name: Fix Corrupt Wrapper and Build APK
       run: |
-        echo "جاري إصلاح وتحديث ملفات الـ Wrapper التالفة لنسخة 8.9..."
-        
-        # تحميل وتثبيت أداة Gradle أصلية ومضمونة لتوليد الـ jar السليم
+        echo "جاري تجهيز البيئة وإصلاح الـ Wrapper..."
         sudo apt-get update && sudo apt-get install -y unzip
         curl -sLo gradle.zip https://services.gradle.org/distributions/gradle-8.9-bin.zip
         mkdir -p /opt/gradle && unzip -q gradle.zip -d /opt/gradle
-        export PATH=$PATH:/opt/gradle/gradle-8.9/bin
-        
-        # إعادة توليد ملف الـ jar السليم بالكامل داخل السيرفر لتخطي التلف
+        export PATH=$PATH:/opt/gradle/gradle-8.9-bin
         gradle wrapper --gradle-version 8.9 --distribution-type all
-        
-        # التأكد من صلاحيات التشغيل والبدء في بناء تطبيق مصحف النور
         chmod +x gradlew
-        ./gradlew :app:compileDebugKotlin --no-daemon
+        
+        echo "جاري بناء ملف الـ APK الفعلي للتطبيق..."
+        ./gradlew :app:assembleDebug --no-daemon
+
+    - name: Upload Application APK
+      uses: actions/upload-artifact@v4
+      with:
+        name: Moshof-AlNoor-Debug-APK
+        path: app/build/outputs/apk/debug/*.apk
