@@ -13,20 +13,29 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 @Composable
 fun SurahListScreen(
     onSurahClick: (Int) -> Unit
 ) {
     val context = LocalContext.current
-    val database = remember { NoorQuranDatabase.getDatabase(context) }
-    val repository = remember { QuranRepository(database.quranDao()) }
-    val surahs by repository.getAllSurahs().collectAsState(initial = emptyList())
+    val repository = remember { QuranRepository(context.applicationContext) }
+    
+    var surahs by remember { mutableStateOf<List<Surah>>(emptyList()) }
+    
+    LaunchedEffect(Unit) {
+        withContext(Dispatchers.IO) {
+            surahs = repository.getAllSurahs()
+        }
+    }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(horizontal = 16.dp)
+            .windowInsetsPadding(WindowInsets.navigationBars)
     ) {
         Spacer(modifier = Modifier.height(48.dp))
         Text(
@@ -93,7 +102,7 @@ fun DeveloperInfoSection() {
 
 @Composable
 fun SurahListItem(
-    surah: SurahEntity,
+    surah: Surah,
     onClick: () -> Unit
 ) {
     Surface(
@@ -110,15 +119,10 @@ fun SurahListItem(
         ) {
             Column(horizontalAlignment = Alignment.End) {
                 Text(
-                    text = surah.nameArabic,
+                    text = surah.name,
                     color = Color(0xFFF8F5E9),
                     fontSize = 22.sp,
                     fontWeight = FontWeight.Light
-                )
-                Text(
-                    text = "${surah.revelationType} • ${surah.versesCount} آية",
-                    color = Color(0xFF888888),
-                    fontSize = 12.sp
                 )
             }
             Spacer(modifier = Modifier.width(20.dp))

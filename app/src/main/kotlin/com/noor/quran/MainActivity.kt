@@ -19,7 +19,9 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            NoorQuranApp()
+            NoorQuranTheme {
+                NoorQuranApp()
+            }
         }
     }
 }

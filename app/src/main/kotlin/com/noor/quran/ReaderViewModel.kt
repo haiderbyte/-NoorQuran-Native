@@ -1,14 +1,23 @@
 package com.noor.quran
 
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class ReaderViewModel(
-    private val repository: QuranRepository,
+    application: Application,
     private val surahId: Int
-) : ViewModel() {
+) : AndroidViewModel(application) {
+
+    private val repository = QuranRepository(application)
+    private val bookmarkManager = BookmarkManager(application)
 
     private val _state = MutableStateFlow(ReaderState())
     val state: StateFlow<ReaderState> = _state.asStateFlow()
@@ -19,15 +28,12 @@ class ReaderViewModel(
 
     private fun loadSurah() {
         viewModelScope.launch {
-            val surah = repository.getSurahById(surahId)
+            val surah = withContext(Dispatchers.IO) { repository.getSurahById(surahId) }
             _state.update { it.copy(surah = surah) }
-        }
 
-        repository.getVersesForSurah(surahId)
-            .onEach { verses ->
-                _state.update { it.copy(verses = verses, isLoading = false) }
-            }
-            .launchIn(viewModelScope)
+            val verses = withContext(Dispatchers.IO) { repository.getVersesForSurah(surahId) }
+            _state.update { it.copy(verses = verses, isLoading = false) }
+        }
     }
 
     fun onAyahClick(ayahNumber: Int) {
@@ -35,14 +41,14 @@ class ReaderViewModel(
             it.copy(expandedAyah = if (it.expandedAyah == ayahNumber) null else ayahNumber)
         }
         viewModelScope.launch {
-            repository.saveBookmark(surahId, ayahNumber)
+            bookmarkManager.saveBookmark(surahId, ayahNumber)
         }
     }
 }
 
 data class ReaderState(
-    val surah: SurahEntity? = null,
-    val verses: List<VerseEntity> = emptyList(),
+    val surah: Surah? = null,
+    val verses: List<VerseWithTafsir> = emptyList(),
     val expandedAyah: Int? = null,
     val isLoading: Boolean = true
 )

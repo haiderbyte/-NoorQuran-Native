@@ -1,5 +1,6 @@
 package com.noor.quran
 
+import android.app.Application
 import androidx.compose.animation.*
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -28,15 +29,13 @@ fun ReaderScreen(
     surahId: Int,
     onBack: () -> Unit
 ) {
-    val context = LocalContext.current
-    val database = remember { NoorQuranDatabase.getDatabase(context) }
-    val repository = remember { QuranRepository(database.quranDao()) }
+    val context = LocalContext.current.applicationContext as Application
     
     val viewModel: ReaderViewModel = viewModel(
         factory = object : ViewModelProvider.Factory {
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
                 @Suppress("UNCHECKED_CAST")
-                return ReaderViewModel(repository, surahId) as T
+                return ReaderViewModel(context, surahId) as T
             }
         }
     )
@@ -53,17 +52,17 @@ fun ReaderScreen(
             ) { isControlsVisible = !isControlsVisible }
     ) {
         LazyColumn(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.navigationBars),
             contentPadding = PaddingValues(top = 100.dp, bottom = 100.dp)
         ) {
             item {
                 SurahIntroduction(state.surah)
             }
-            items(state.verses, key = { "${it.surah_number}-${it.ayah_number}" }) { verse ->
+            items(state.verses, key = { "${it.surahId}-${it.ayahNumber}" }) { verse ->
                 VerseCard(
                     verse = verse,
-                    isExpanded = state.expandedAyah == verse.ayah_number,
-                    onAyahClick = { viewModel.onAyahClick(verse.ayah_number) }
+                    isExpanded = state.expandedAyah == verse.ayahNumber,
+                    onAyahClick = { viewModel.onAyahClick(verse.ayahNumber) }
                 )
             }
         }
@@ -77,7 +76,7 @@ fun ReaderScreen(
             TopAppBar(
                 title = { 
                     Text(
-                        state.surah?.nameArabic ?: "", 
+                        state.surah?.name ?: "", 
                         color = Color.White, 
                         fontWeight = FontWeight.Light,
                         fontSize = 18.sp
@@ -95,7 +94,7 @@ fun ReaderScreen(
 }
 
 @Composable
-fun SurahIntroduction(surah: SurahEntity?) {
+fun SurahIntroduction(surah: Surah?) {
     if (surah == null) return
     Column(
         modifier = Modifier
@@ -104,7 +103,7 @@ fun SurahIntroduction(surah: SurahEntity?) {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = surah.nameArabic,
+            text = surah.name,
             color = Color.White,
             fontSize = 38.sp,
             fontWeight = FontWeight.ExtraLight
@@ -123,7 +122,7 @@ fun SurahIntroduction(surah: SurahEntity?) {
 
 @Composable
 fun VerseCard(
-    verse: VerseEntity,
+    verse: VerseWithTafsir,
     isExpanded: Boolean,
     onAyahClick: () -> Unit
 ) {
@@ -135,11 +134,12 @@ fun VerseCard(
                 indication = null,
                 onClick = onAyahClick
             )
-            .padding(horizontal = 24.dp, vertical = 20.dp),
+            .padding(horizontal = 24.dp, vertical = 20.dp)
+            .animateContentSize(),
         horizontalAlignment = Alignment.End
     ) {
         Text(
-            text = "${TextUtils.cleanQuranicText(verse.text)} ﴿${TextUtils.toArabicDigits(verse.ayah_number)}﴾",
+            text = "${TextUtils.cleanQuranicText(verse.text)} ﴿${TextUtils.toArabicDigits(verse.ayahNumber)}﴾",
             color = Color(0xFFF8F5E9),
             fontSize = 28.sp,
             lineHeight = 48.sp,
@@ -156,7 +156,7 @@ fun VerseCard(
                 HorizontalDivider(color = Color(0xFF222222))
                 Spacer(modifier = Modifier.height(12.dp))
                 Text(
-                    text = verse.tafsir_text,
+                    text = verse.tafsirText,
                     color = Color(0xFF888888),
                     fontSize = 16.sp,
                     lineHeight = 24.sp,

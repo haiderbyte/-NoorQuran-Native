@@ -1,21 +1,19 @@
 package com.noor.quran
 
-import kotlinx.coroutines.flow.Flow
+import android.content.Context
 
-class QuranRepository(private val quranDao: QuranDao) {
+class QuranRepository(context: Context) {
+    private val dao = NoorQuranDatabase.getDatabase(context).quranDao()
 
-    fun getAllSurahs(): Flow<List<SurahEntity>> = quranDao.getAllSurahs()
-
-    fun getVersesForSurah(surahId: Int): Flow<List<VerseEntity>> = 
-        quranDao.getVersesForSurah(surahId)
-
-    suspend fun getSurahById(surahId: Int): SurahEntity? = 
-        quranDao.getSurahById(surahId)
-
-    suspend fun saveBookmark(surahId: Int, ayahId: Int) {
-        quranDao.clearBookmarkForSurah(surahId)
-        quranDao.saveBookmark(BookmarkEntity(surahId, ayahId))
+    suspend fun getAllSurahs(): List<Surah> {
+        return dao.getAllSurahs()
     }
 
-    fun getLastRead(): Flow<BookmarkEntity?> = quranDao.getLastReadBookmark()
+    suspend fun getSurahById(id: Int): Surah? {
+        return dao.getSurahById(id)
+    }
+
+    suspend fun getVersesForSurah(surahId: Int): List<VerseWithTafsir> {
+        return dao.getVersesWithTafsir(surahId)
+    }
 }
