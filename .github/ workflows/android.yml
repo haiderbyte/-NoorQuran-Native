@@ -1,0 +1,42 @@
+name: Android CI Build
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+
+    - name: Set up JDK 21
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'zulu'
+        java-version: '21'
+        cache: 'gradle'
+
+    - name: Fix Corrupt Wrapper and Build APK
+      run: |
+        echo "جاري تجهيز بيئة تشغيل وتثبيت Gradle 8.9..."
+        sudo apt-get update && sudo apt-get install -y unzip
+        curl -sLo gradle.zip https://services.gradle.org/distributions/gradle-8.9-bin.zip
+        mkdir -p /opt/gradle && unzip -q gradle.zip -d /opt/gradle
+        export PATH=$PATH:/opt/gradle/gradle-8.9/bin
+        
+        gradle wrapper --gradle-version 8.9 --distribution-type all
+        chmod +x gradlew
+        
+        echo "جاري بناء ملف الـ APK النهائي الحقيقي..."
+        ./gradlew :app:assembleDebug --no-daemon
+
+    - name: Upload Application APK
+      uses: actions/upload-artifact@v4
+      with:
+        name: Moshof-AlNoor-With-Data-APK
+        path: app/build/outputs/apk/debug/*.apk
