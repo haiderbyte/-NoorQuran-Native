@@ -1,26 +1,22 @@
-# مصحف النور (NoorQuran-Native)
+# مصحف النور — NoorQuran Native
 
-تطبيق أندرويد بلغة Kotlin لقراءة القرآن الكريم مع التفسير الميسر، ومصمم ليكون أصليًا بالكامل (Native) وخفيفًا وسريع الاستجابة.
+تطبيق Android أصلي بـ Kotlin وJetpack Compose لقراءة القرآن الكريم والتفسير الميسر. يتضمن قاعدة بيانات محلية للاستخدام دون اتصال.
 
----
+## المتطلبات
 
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://ai.google.dev/static/site-assets/images/share-ais-513315318.png" />
-</div>
+- Android Studio.
+- JDK 17.
+- Android SDK 35 (minSdk 24).
+- Gradle Wrapper 8.9 المرفق.
 
-# Run and deploy your AI Studio app
+## التثبيت والتشغيل
 
-This contains everything you need to run your app locally.
+```bash
+git clone https://github.com/haiderbyte/-NoorQuran-Native.git
+cd -NoorQuran-Native
+./gradlew assembleDebug
+```
 
-View your app in AI Studio: https://ai.studio/apps/67dedeef-22b4-400f-917b-9104be029de6
+أو افتح مجلد المشروع في Android Studio، ثبّت Android SDK 35 من SDK Manager، ثم نفّذ **Sync Project with Gradle Files** واضغط **Run** على محاكي أو جهاز Android.
 
-## Run Locally
-
-**Prerequisites:**  Node.js
-
-
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+بعد نجاح بناء debug ستجد الملف في `app/build/outputs/apk/debug/app-debug.apk`. لا يحتاج التطبيق إلى Node.js أو مفتاح Gemini؛ خطوات AI Studio القديمة لم تكن تخص مشروع Android هذا. لم يُتحقق من بناء APK في بيئة الفحص لغياب Android SDK.
